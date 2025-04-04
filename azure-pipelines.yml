@@ -26,14 +26,14 @@ steps:
     solution: '**/*.sln'
     msbuildArgs: '/p:DeployOnBuild=true /p:PublishProfile=FolderProfile'
 
-# Publish build artifacts (optional, for deployment or packaging)
+# Publish build artifacts (for packaging or deployment)
 - task: PublishBuildArtifacts@1
   inputs:
     pathToPublish: $(Build.ArtifactStagingDirectory)
     artifactName: 'drop'
     publishLocation: 'Container'
 
-# Create the NuGet package
+# Create the NuGet package using NuGetCommand
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
@@ -45,5 +45,5 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: 'push'
-    publishVstsFeed: 'MyNuGetFeed'  # Replace this with your actual feed name
+    publishVstsFeed: 'MyNuGetFeed'  # Replace with your actual feed name
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
