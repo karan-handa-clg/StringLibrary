@@ -37,5 +37,5 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: 'push'
-    publishVstsFeed: 'your-feed-name'
+    publishVstsFeed: 'karanH-name'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
