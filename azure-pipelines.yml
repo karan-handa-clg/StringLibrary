@@ -1,49 +1,49 @@
 trigger:
   branches:
     include:
-      - master
+      - master  # This triggers the pipeline on changes to the master branch
 
 pool:
   vmImage: 'windows-latest'  # Use Windows agent for MSBuild and NuGet tasks
 
 steps:
-# Install .NET SDK (for .NET 8.x)
+# Step 1: Install .NET SDK (for .NET 8.x)
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
     version: '8.x'
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
-# Restore dependencies using NuGet
+# Step 2: Restore dependencies using NuGet
 - task: NuGetCommand@2
   inputs:
     command: 'restore'
-    restoreSolution: '**/*.sln'
+    restoreSolution: '**/*.sln'  # Restore dependencies for the solution
 
-# Build the solution using MSBuild
+# Step 3: Build the solution using MSBuild
 - task: MSBuild@1
   inputs:
-    solution: '**/*.sln'
+    solution: '**/*.sln'  # Build the entire solution
     msbuildArgs: '/p:DeployOnBuild=true /p:PublishProfile=FolderProfile'
 
-# Publish build artifacts (for packaging or deployment)
+# Step 4: Publish build artifacts (for packaging or deployment)
 - task: PublishBuildArtifacts@1
   inputs:
-    pathToPublish: $(Build.ArtifactStagingDirectory)
-    artifactName: 'drop'
-    publishLocation: 'Container'
+    pathToPublish: $(Build.ArtifactStagingDirectory)  # Publish the artifacts
+    artifactName: 'drop'  # Name of the artifact
+    publishLocation: 'Container'  # Publish location (container)
 
-# Create the NuGet package using NuGetCommand
+# Step 5: Create the NuGet package using NuGetCommand
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
-    packagesToPack: '**/*.csproj'
-    versioningScheme: 'off'
-    outputDir: '$(Build.ArtifactStagingDirectory)'
+    packagesToPack: '**/*.csproj'  # Create a NuGet package from the .csproj files
+    versioningScheme: 'off'  # Versioning scheme (disable automatic versioning)
+    outputDir: '$(Build.ArtifactStagingDirectory)'  # Output directory for the NuGet package
 
-# Push the NuGet package to Azure Artifacts feed
+# Step 6: Push the NuGet package to Azure Artifacts feed
 - task: NuGetCommand@2
   inputs:
     command: 'push'
-    publishVstsFeed: 'MyNuGetFeed'  # Replace with your actual feed name
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    publishVstsFeed: 'MyNuGetFeed'  # Replace this with your actual feed name in Azure Artifacts
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'  # Path to the generated .nupkg file
