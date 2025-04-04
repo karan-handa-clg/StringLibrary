@@ -1,0 +1,41 @@
+trigger:
+  branches:
+    include:
+      - master
+
+pool:
+  vmImage: 'windows-latest'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '8.x'
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- task: Restore@2
+  inputs:
+    restoreSolution: '**/*.sln'
+
+- task: Build@1
+  inputs:
+    solution: '**/*.sln'
+    msbuildArgs: '/p:DeployOnBuild=true /p:PublishProfile=FolderProfile'
+
+- task: Publish@1
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)'
+    publishLocation: 'Container'
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/*.csproj'
+    versioningScheme: 'off'
+    outputDir: '$(Build.ArtifactStagingDirectory)'
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'push'
+    publishVstsFeed: 'your-feed-name'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
