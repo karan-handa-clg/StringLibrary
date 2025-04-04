@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<!-- Ensures this is a Console Application -->
+		<TargetFramework>net8.0</TargetFramework>
+		<!-- Target .NET 8 -->
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\StringLibrary\StringLibrary.csproj" />
+		<!-- Reference to the class library -->
+	</ItemGroup>
+
+</Project>
