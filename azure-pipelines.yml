@@ -4,29 +4,36 @@ trigger:
       - master
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-latest'  # Use Windows agent for MSBuild and NuGet tasks
 
 steps:
+# Install .NET SDK (for .NET 8.x)
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
     version: '8.x'
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
-- task: Restore@2
+# Restore dependencies using NuGet
+- task: NuGetCommand@2
   inputs:
+    command: 'restore'
     restoreSolution: '**/*.sln'
 
-- task: Build@1
+# Build the solution using MSBuild
+- task: MSBuild@1
   inputs:
     solution: '**/*.sln'
     msbuildArgs: '/p:DeployOnBuild=true /p:PublishProfile=FolderProfile'
 
-- task: Publish@1
+# Publish build artifacts (optional, for deployment or packaging)
+- task: PublishBuildArtifacts@1
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)'
+    pathToPublish: $(Build.ArtifactStagingDirectory)
+    artifactName: 'drop'
     publishLocation: 'Container'
 
+# Create the NuGet package
 - task: NuGetCommand@2
   inputs:
     command: 'pack'
@@ -34,9 +41,9 @@ steps:
     versioningScheme: 'off'
     outputDir: '$(Build.ArtifactStagingDirectory)'
 
+# Push the NuGet package to Azure Artifacts feed
 - task: NuGetCommand@2
   inputs:
     command: 'push'
-    publishVstsFeed: 'MyNuGetFeed' 
+    publishVstsFeed: 'MyNuGetFeed'  # Replace this with your actual feed name
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-
