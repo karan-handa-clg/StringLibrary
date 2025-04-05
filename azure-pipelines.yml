@@ -3,9 +3,8 @@ trigger:
     include:
       - master  # Trigger pipeline on changes to master branch
 
-# Use your self-hosted agent pool here
 pool:
-  name: 'LabAgentPool'  # Replace with your actual project-specific agent pool name
+  name: 'LabAgentPool'  # Use your actual project-specific agent pool name
 
 steps:
 # Install .NET SDK (for .NET 8.x)
@@ -14,6 +13,13 @@ steps:
     packageType: 'sdk'
     version: '8.x'
     installationPath: $(Agent.ToolsDirectory)/dotnet
+
+# Clean up bin/obj folders (optional)
+- task: DeleteFiles@1
+  inputs:
+    SourceFolder: $(Build.SourcesDirectory)
+    Contents: '**/bin/**, **/obj/**'
+    RemoveSourceFolder: false
 
 # Restore dependencies using NuGet
 - task: NuGetCommand@2
@@ -25,7 +31,7 @@ steps:
 - task: MSBuild@1
   inputs:
     solution: '**/*.sln'
-    msbuildArgs: '/p:DeployOnBuild=true /p:PublishProfile=FolderProfile'
+    msbuildArgs: '/p:Configuration=Release'
 
 # Publish build artifacts (for packaging or deployment)
 - task: PublishBuildArtifacts@1
@@ -46,5 +52,5 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: 'push'
-    publishVstsFeed: 'khanda4'  # Replace with your actual feed name
+    publishVstsFeed: 'https://pkgs.dev.azure.com/khanda4/MyProject/_packaging/MyFeed/nuget/v3/index.json'  # Replace with your actual feed URL
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
