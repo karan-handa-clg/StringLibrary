@@ -3,8 +3,9 @@ trigger:
     include:
       - master  # Trigger pipeline on changes to master branch
 
+# Use your self-hosted agent pool here
 pool:
-  vmImage: 'windows-latest'  # Use Windows agent for MSBuild and NuGet tasks
+  name: 'LabAgentPool'  # Replace with your actual project-specific agent pool name
 
 steps:
 # Install .NET SDK (for .NET 8.x)
@@ -45,5 +46,5 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: 'push'
-    publishVstsFeed: 'MyNuGetFeed'  # Replace with your actual feed name
+    publishVstsFeed: 'khanda4'  # Replace with your actual feed name
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
